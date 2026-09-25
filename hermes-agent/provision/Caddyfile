@@ -1,0 +1,17 @@
+# TLS termination for the Hermes bridge.
+# Replace agent.example.com with your real domain (A record -> VPS IP).
+# Caddy provisions Let's Encrypt certificates automatically.
+#
+# Install: https://caddyserver.com/docs/install  then place this file at
+# /etc/caddy/Caddyfile and `systemctl reload caddy`.
+
+agent.example.com {
+	# Only the webhook route and health check are exposed.
+	@allowed path /hooks/hubspot /healthz
+	handle @allowed {
+		reverse_proxy 127.0.0.1:8787
+	}
+	handle {
+		respond 404
+	}
+}

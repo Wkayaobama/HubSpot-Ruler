@@ -1,0 +1,68 @@
+# Telegram-first ingestion sources for the RevOps radar.
+#
+# mode:
+#   auto     mtproto when TELEGRAM_API_ID/HASH/SESSION are set in .env,
+#            otherwise the zero-auth t.me/s/ web preview (last ~20 posts).
+#   mtproto  force Telethon user-session fetching.
+#   web      force the t.me/s/ preview scraper.
+mode: auto
+
+# Max posts per channel per run (mtproto mode; the web preview is capped ~20).
+fetch_limit: 30
+
+# Minimum total keyword hits for a post to enter the knowledge inbox.
+min_score: 1
+
+# PLACEHOLDERS — replace with the channels you actually follow.
+# Verify a channel exposes a public preview by opening https://t.me/s/<username>.
+# (See docs/SCOPING.md Q4 — channel list is a scoping decision.)
+channels:
+  - username: REPLACE_ME_revops_channel
+    tags: [revops]
+  - username: REPLACE_ME_gtm_channel
+    tags: [gtm]
+  - username: REPLACE_ME_ai_agents_channel
+    tags: [skills_patterns]
+
+# Keyword buckets used to score and tag posts. A post is kept when its total
+# hits across all topics >= min_score, and tagged with each matched topic.
+topics:
+  revops:
+    - revenue operations
+    - revops
+    - pipeline
+    - forecast
+    - forecasting
+    - churn
+    - retention
+    - CAC
+    - NRR
+    - ARR
+    - quota
+    - attribution
+    - lead scoring
+    - deal desk
+    - sales ops
+    - CRM
+    - hubspot
+  gtm:
+    - go-to-market
+    - GTM
+    - outbound
+    - inbound
+    - ICP
+    - sales playbook
+    - discovery call
+    - win rate
+    - conversion
+  skills_patterns:
+    - agent skill
+    - ai agent
+    - prompt pattern
+    - prompt engineering
+    - workflow automation
+    - playbook
+    - SOP
+    - template
+    - automation recipe
+    - llm

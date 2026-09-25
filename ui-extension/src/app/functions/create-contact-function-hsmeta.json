@@ -1,0 +1,8 @@
+{
+  "uid": "create_icalps_contact",
+  "type": "app-function",
+  "config": {
+    "entrypoint": "/app/functions/createIcAlpsContact.js",
+    "secretKeys": []
+  }
+}

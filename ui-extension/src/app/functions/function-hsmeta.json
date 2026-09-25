@@ -1,0 +1,8 @@
+{
+  "uid": "update_deal_properties",
+  "type": "app-function",
+  "config": {
+    "entrypoint": "/app/functions/updateDealProperties.js",
+    "secretKeys": []
+  }
+}

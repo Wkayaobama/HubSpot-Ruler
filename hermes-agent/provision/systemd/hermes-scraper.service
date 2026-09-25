@@ -1,0 +1,12 @@
+[Unit]
+Description=Hermes RevOps radar — Telegram scrape + knowledge inbox update
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hermes-stack
+EnvironmentFile=/opt/hermes-stack/.env
+Environment=PYTHONPATH=/opt/hermes-stack
+ExecStart=/opt/hermes-stack/.venv/bin/python -m scraper.scrape_telegram
+TimeoutStartSec=900

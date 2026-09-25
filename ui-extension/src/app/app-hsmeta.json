@@ -1,0 +1,40 @@
+{
+  "uid": "icalps_card_app",
+  "type": "app",
+  "config": {
+    "description": "IcAlps CRM card: namespace-prefixed Deal properties with inline edit and Communications_ custom-object create.",
+    "name": "IcAlps CRM Card",
+    "distribution": "private",
+    "auth": {
+      "type": "static",
+      "requiredScopes": [
+        "oauth",
+        "crm.objects.deals.read",
+        "crm.objects.deals.write",
+        "crm.objects.contacts.read",
+        "crm.objects.contacts.write",
+        "crm.objects.companies.read",
+        "crm.objects.companies.write",
+        "crm.objects.custom.read",
+        "crm.objects.custom.write",
+        "crm.schemas.custom.read",
+        "crm.objects.owners.read"
+      ],
+      "optionalScopes": [],
+      "conditionallyRequiredScopes": []
+    },
+    "permittedUrls": {
+      "fetch": [
+        "https://api.hubapi.com"
+      ],
+      "iframe": [],
+      "img": []
+    },
+    "support": {
+      "supportEmail": "anthony.yaobama@gmail.com",
+      "documentationUrl": "https://github.com/Wkayaobama/HubSpot---Worfklow",
+      "supportUrl": "https://github.com/Wkayaobama/HubSpot---Worfklow/issues",
+      "supportPhone": "+10000000000"
+    }
+  }
+}

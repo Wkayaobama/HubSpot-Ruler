@@ -1,0 +1,747 @@
+{
+  "meta": {
+    "source": "HubSpot MCP connector — search_properties / get_properties / query_crm_data / tool_guidance",
+    "captured": "2026-09-14",
+    "portal_owner_count": 47,
+    "note": "type_source='verified' means fetched via get_properties; 'inferred' means derived from the label and must be confirmed before filtering on it."
+  },
+  "derivation_rules": [
+    {
+      "id": "R1",
+      "name": "ENUM-VALUE MATCH",
+      "rule": "If the user's phrase equals or contains an enumeration option VALUE or LABEL of a property, that property wins. 'QVault TPM IoT' is an option of prod___product_name_new_ → filter that property with the exact value. Highest confidence.",
+      "example": "prod___product_name_new_ = 'QVault TPM IOT'"
+    },
+    {
+      "id": "R2",
+      "name": "LABEL MATCH",
+      "rule": "Match the phrase to the business LABEL (incl. prefixes 'PROD -', 'OPP CUST -', 'INFO -', 'DATE -'), not the internal name. 'Sales region' → INFO - Sales Region → sales_region.",
+      "example": "sales_region"
+    },
+    {
+      "id": "R3",
+      "name": "GOVERNANCE PRECEDENCE",
+      "rule": "Prefer the governed property: label/description says '(new)' or 'only use this from now on'. Demote '(USE ONLY IF EXCEPTION)', '(DO NOT USE)', '(IGNORE)', 'TEST', 'to_delete', 'Test Property'. product_name and solution_family__new_ are never the default answer.",
+      "example": "prod___product_name_new_ > product_name > solution_family__new_"
+    },
+    {
+      "id": "R4",
+      "name": "YEAR-BY-LABEL",
+      "rule": "For any (metric, year) phrase — pipeline / cumulative pipeline / weighted / volume / weighted volume / services value / ASP — resolve through the LABEL. Several internal names were recycled (weighted_2021_calculation is 'Weighted 2027 (k$)'; asp_in_usd_q2_2022_calculation is 'ARR ($K/Y)'). Use the Year Resolver sheet.",
+      "example": "Weighted 2027 (k$) → weighted_2021_calculation"
+    },
+    {
+      "id": "R5",
+      "name": "TYPE PREFERENCE",
+      "rule": "enumeration > bool > number > free-text string. For money aggregation always use amount_in_home_currency / hs_projected_amount_in_home_currency; never SUM(amount) across currencies. Display amount together with deal_currency_code.",
+      "example": "SUM(amount_in_home_currency)"
+    },
+    {
+      "id": "R6",
+      "name": "STATE SHORTCUTS",
+      "rule": "won / lost / open / closed → hs_is_closed_won / hs_is_closed_lost / hs_is_closed (booleans, pipeline-independent). Only use dealstage IDs when the user names a specific stage AND pipeline (IDs are pipeline-specific; 'Design Win' has 6 different IDs).",
+      "example": "hs_is_closed = false"
+    },
+    {
+      "id": "R7",
+      "name": "NAME-LIKE FALLBACK",
+      "rule": "dealname LIKE '%x%' is a LAST RESORT, only when no enum option matches, and the answer must be flagged approximate. Never use it for product/category questions — it under-counts (2 vs 32 for QVault TPM IoT).",
+      "example": "dealname LIKE '%Qvault%'  ← wrong for product counts"
+    },
+    {
+      "id": "R8",
+      "name": "ASSOCIATION",
+      "rule": "'company / account / contact of the deal' → cross-object OBJECT.property in SELECT/WHERE (COMPANY.name, CONTACT.email). Existence checks → associations.OBJECT IS NOT NULL (WHERE only). Max 2 associated objects per query.",
+      "example": "SELECT dealname, COMPANY.name FROM DEAL"
+    },
+    {
+      "id": "R9",
+      "name": "SELF-REFERENCE",
+      "rule": "'my / I / me / mine' → hubspot_owner_id = <resolved owner id> (resolve via user-details). Without it the query returns the whole account.",
+      "example": "hubspot_owner_id = '29462792'"
+    },
+    {
+      "id": "R10",
+      "name": "TIME WINDOW DEFAULTS",
+      "rule": "'this year' = 2026-01-01..2026-12-31; 'this quarter' = 2026-07-01..2026-09-30; 'last quarter' = 2026-04-01..2026-06-30; 'last 90 days' = since 2026-06-16. Dates use BETWEEN with 'YYYY-MM-DD' strings, never timestamps.",
+      "example": "closedate BETWEEN '2026-01-01' AND '2026-12-31'"
+    },
+    {
+      "id": "R11",
+      "name": "AMBIGUITY",
+      "rule": "If two governed properties both match (e.g. 'TPM' hits product_hierarchy=TPM, product_line=TPM and prod___product_name_new_ in {QVault TPM, QVault TPM IOT}), pick the most specific level the user named (SKU > line > family) and state the alternates.",
+      "example": "TPM → product_line unless a SKU was named"
+    }
+  ],
+  "intents": [
+    {
+      "id": "P01",
+      "intent": "Count / list deals for a specific product SKU (e.g. QVault TPM IoT, INES, VIC408, QS7001)",
+      "trigger_tokens": "qvault, tpm iot, ines, vic4xx, vic1xx, vic2xx, qs7001, scr, ms600x, sealbox, nanoseal, sealcoin, wise.sat, nre, oci, pki/gsma",
+      "object": "DEAL",
+      "property": "prod___product_name_new_ (PROD - Product name(new))",
+      "derivation_rule": "R1 enum-value match + R3 governance",
+      "confidence": "HIGH",
+      "alternates": "product_hierarchy (family), product_line (line), tpm_qvault___qs7001___ip__ (IP flag), hs_num_of_associated_line_items (HubSpot product library)",
+      "trap_never_use": "dealname LIKE — under-counts (2 vs 32). product_name (exception only). solution_family__new_ (DO NOT USE).",
+      "hubsql": "SELECT COUNT(*) FROM DEAL WHERE prod___product_name_new_ = 'QVault TPM IOT'",
+      "copy_paste_prompt": "Count the deals whose property prod___product_name_new_ (PROD - Product name(new)) equals 'QVault TPM IOT'. Use the property, not the deal name. Also give me the count for 'QVault TPM' separately."
+    },
+    {
+      "id": "P02",
+      "intent": "Deals by product family / hierarchy (SCR, VIC, TPM, PKI, ASIC, CISCO, MS600x)",
+      "trigger_tokens": "product family, family, hierarchy, all tpm products, all vic",
+      "object": "DEAL",
+      "property": "product_hierarchy",
+      "derivation_rule": "R1 + R11 (family level named)",
+      "confidence": "HIGH",
+      "alternates": "product_line, prod___product_name_new_",
+      "trap_never_use": "dealname LIKE",
+      "hubsql": "SELECT product_hierarchy, COUNT(*), SUM(amount_in_home_currency) FROM DEAL WHERE hs_is_closed = false GROUP BY product_hierarchy",
+      "copy_paste_prompt": "Group open deals by product_hierarchy with count and SUM(amount_in_home_currency)."
+    },
+    {
+      "id": "P03",
+      "intent": "Deals by product line (ASIC / Quantum Shield / PKI / TPM / Legacy)",
+      "trigger_tokens": "product line, quantum shield, line",
+      "object": "DEAL",
+      "property": "product_line",
+      "derivation_rule": "R1/R2",
+      "confidence": "HIGH",
+      "alternates": "product_hierarchy, prod___product_name_new_",
+      "trap_never_use": "product_line__opp_ (free text duplicate)",
+      "hubsql": "SELECT product_line, SUM(hs_projected_amount_in_home_currency) FROM DEAL WHERE hs_is_closed = false GROUP BY product_line",
+      "copy_paste_prompt": "Weighted open pipeline by product_line using hs_projected_amount_in_home_currency."
+    },
+    {
+      "id": "P04",
+      "intent": "Service deals (NRE, PKI service, digital signature, FTK, pre-study, satellite service, quantum service)",
+      "trigger_tokens": "service, nre, pki service, ssl, ftk, pre-study, satellite, digital signature",
+      "object": "DEAL",
+      "property": "service_name",
+      "derivation_rule": "R1",
+      "confidence": "HIGH",
+      "alternates": "pipeline = SealSQ Services (13772279) / Wisekey Services + PKI (40296576)",
+      "trap_never_use": "dealname LIKE '%service%'",
+      "hubsql": "SELECT service_name, COUNT(*), SUM(amount_in_home_currency) FROM DEAL GROUP BY service_name",
+      "copy_paste_prompt": "Break down deals by service_name with count and SUM(amount_in_home_currency)."
+    },
+    {
+      "id": "P05",
+      "intent": "Is TPM / QVault / QS7001 IP involved?",
+      "trigger_tokens": "ip, ip licensing, tpm ip",
+      "object": "DEAL",
+      "property": "tpm_qvault___qs7001___ip__",
+      "derivation_rule": "R2",
+      "confidence": "MEDIUM",
+      "alternates": "prod___product_name_new_",
+      "trap_never_use": "",
+      "hubsql": "SELECT COUNT(*) FROM DEAL WHERE tpm_qvault___qs7001___ip__ = 'Yes'",
+      "copy_paste_prompt": "Count deals where tpm_qvault___qs7001___ip__ = 'Yes'."
+    },
+    {
+      "id": "P06",
+      "intent": "Deals per pipeline / business unit",
+      "trigger_tokens": "pipeline, business unit, bu, sealsq hardware, sealsq services, wisekey, wise.sat, sealcoin, icalps, quantum & ai",
+      "object": "DEAL",
+      "property": "pipeline",
+      "derivation_rule": "R1 (pipeline labels are enum labels; filter by ID)",
+      "confidence": "HIGH",
+      "alternates": "icalps__sealsq, wisekey___seal",
+      "trap_never_use": "pipeline2021..2026 (legacy flags)",
+      "hubsql": "SELECT pipeline, COUNT(*), SUM(amount_in_home_currency) FROM DEAL WHERE hs_is_closed = false GROUP BY pipeline",
+      "copy_paste_prompt": "Open deals per pipeline (count + SUM(amount_in_home_currency)). Map pipeline IDs to labels: 12096408 SealSQ Hardware, 13772279 SealSQ Services, 40296576 Wisekey Services + PKI, 875072356 Wise.Sat, 705868909 SEALCOIN, 766126206 Icalps_hardware, 934982230 Quantum & AI."
+    },
+    {
+      "id": "P07",
+      "intent": "Deals in a named stage (Identified / Qualified / Design In / Design Win / Closed Won / Lost / Dead / On-Hold / Negociating / PO Sent)",
+      "trigger_tokens": "stage, design win, design in, identified, qualified, on hold, negotiating, po sent",
+      "object": "DEAL",
+      "property": "dealstage (pipeline-specific IDs)",
+      "derivation_rule": "R1 + R6",
+      "confidence": "HIGH",
+      "alternates": "hs_is_closed_won / hs_is_closed_lost for won/lost; identified_date/qualified_date/design_in_date/design_win_date for 'when'",
+      "trap_never_use": "Stage label alone is ambiguous — 'Design Win' = 12096412 | 31868514 | 85103755 | 1311252062 | 1031449004 | 1116419647",
+      "hubsql": "SELECT dealstage, COUNT(*) FROM DEAL WHERE hs_is_closed = false GROUP BY dealstage",
+      "copy_paste_prompt": "Count open deals per dealstage and translate the stage IDs to '<stage> (<pipeline>)' labels. If I name one stage without a pipeline, include all pipelines' IDs for that stage."
+    },
+    {
+      "id": "P08",
+      "intent": "Open / active deals",
+      "trigger_tokens": "open, active, in flight, current pipeline",
+      "object": "DEAL",
+      "property": "hs_is_closed = false",
+      "derivation_rule": "R6",
+      "confidence": "HIGH",
+      "alternates": "hs_is_open_count = 1",
+      "trap_never_use": "dealstage NOT IN ('closedwon','closedlost') — those generic IDs do not exist in this portal",
+      "hubsql": "SELECT COUNT(*), SUM(amount_in_home_currency) FROM DEAL WHERE hs_is_closed = false",
+      "copy_paste_prompt": "Count and total (amount_in_home_currency) of deals where hs_is_closed = false."
+    },
+    {
+      "id": "P09",
+      "intent": "Won deals / bookings / revenue won",
+      "trigger_tokens": "won, closed won, bookings, wins",
+      "object": "DEAL",
+      "property": "hs_is_closed_won = true",
+      "derivation_rule": "R6",
+      "confidence": "HIGH",
+      "alternates": "closed_won_date (custom milestone), hs_closed_won_count",
+      "trap_never_use": "dealstage = 'Closed Won' (6 different IDs)",
+      "hubsql": "SELECT SUM(amount_in_home_currency) FROM DEAL WHERE hs_is_closed_won = true AND closedate BETWEEN '2026-01-01' AND '2026-12-31'",
+      "copy_paste_prompt": "Total won revenue in 2026: SUM(amount_in_home_currency) where hs_is_closed_won = true and closedate in 2026."
+    },
+    {
+      "id": "P10",
+      "intent": "Lost / dead deals and why",
+      "trigger_tokens": "lost, dead, why lost, loss reasons, churn",
+      "object": "DEAL",
+      "property": "hs_is_closed_lost = true → stratification_of_lost_deals",
+      "derivation_rule": "R6 + R1",
+      "confidence": "HIGH",
+      "alternates": "closed_lost_reason (free text), closed_lost_date, closed_dead_date, amount_lost (label 'Weighted2027[BI]' — recycled!)",
+      "trap_never_use": "amount_lost is NOT 'amount lost' — its label is Weighted2027[BI]",
+      "hubsql": "SELECT stratification_of_lost_deals, COUNT(*), SUM(amount_in_home_currency) FROM DEAL WHERE hs_is_closed_lost = true GROUP BY stratification_of_lost_deals",
+      "copy_paste_prompt": "For deals with hs_is_closed_lost = true, group by stratification_of_lost_deals with count and SUM(amount_in_home_currency)."
+    },
+    {
+      "id": "P11",
+      "intent": "Pipeline value / total revenue / how much",
+      "trigger_tokens": "how much, value, revenue, total, $, k$, worth",
+      "object": "DEAL",
+      "property": "amount_in_home_currency",
+      "derivation_rule": "R5",
+      "confidence": "HIGH",
+      "alternates": "hs_projected_amount_in_home_currency (weighted), amount + deal_currency_code (display)",
+      "trap_never_use": "SUM(amount) mixes EUR and USD",
+      "hubsql": "SELECT SUM(amount_in_home_currency) FROM DEAL WHERE hs_is_closed = false",
+      "copy_paste_prompt": "Total open pipeline as SUM(amount_in_home_currency) where hs_is_closed = false."
+    },
+    {
+      "id": "P12",
+      "intent": "Weighted / probability-adjusted pipeline",
+      "trigger_tokens": "weighted, expected, probability adjusted, projected",
+      "object": "DEAL",
+      "property": "hs_projected_amount_in_home_currency",
+      "derivation_rule": "R5",
+      "confidence": "HIGH",
+      "alternates": "hs_forecast_amount, weighted_amount__k__, weighted_amount_corrected, Weighted YYYY (k$) via Year Resolver",
+      "trap_never_use": "hs_projected_amount (raw currency)",
+      "hubsql": "SELECT SUM(hs_projected_amount_in_home_currency) FROM DEAL WHERE hs_is_closed = false",
+      "copy_paste_prompt": "Weighted open pipeline = SUM(hs_projected_amount_in_home_currency) where hs_is_closed = false."
+    },
+    {
+      "id": "P13",
+      "intent": "Year-indexed metric: Pipeline / Cumulative pipeline / Weighted / Volume / Weighted volume / Services value / ASP for a year",
+      "trigger_tokens": "pipeline 2027, weighted 2028, volume 2026, asp 2029, services value 2027, cumulative pipeline",
+      "object": "DEAL",
+      "property": "→ Year Resolver sheet (label-driven)",
+      "derivation_rule": "R4",
+      "confidence": "HIGH once resolved",
+      "alternates": "see Year Resolver",
+      "trap_never_use": "Internal names with years in them (weighted_2021_calculation = Weighted 2027!)",
+      "hubsql": "SELECT SUM(weighted_2021_calculation) FROM DEAL WHERE hs_is_closed = false   -- 'Weighted 2027 (k$)'",
+      "copy_paste_prompt": "Sum the property whose LABEL is exactly 'Weighted 2027 (k$)' (internal name weighted_2021_calculation) over open deals. Do not pick a property by its internal name year."
+    },
+    {
+      "id": "P14",
+      "intent": "Commit / forecast category",
+      "trigger_tokens": "commit, committed, forecast category, omitted",
+      "object": "DEAL",
+      "property": "hs_manual_forecast_category",
+      "derivation_rule": "R1",
+      "confidence": "HIGH",
+      "alternates": "revenue_state (Pipeline/Forecast/BIBA), forecast_source",
+      "trap_never_use": "",
+      "hubsql": "SELECT hs_manual_forecast_category, SUM(amount_in_home_currency) FROM DEAL WHERE hs_is_closed = false GROUP BY hs_manual_forecast_category",
+      "copy_paste_prompt": "Open pipeline by hs_manual_forecast_category (OMIT = Not forecasted, COMMIT, CLOSED)."
+    },
+    {
+      "id": "P15",
+      "intent": "Revenue state: BIBA vs Forecast vs Pipeline",
+      "trigger_tokens": "biba, forecast state, revenue state",
+      "object": "DEAL",
+      "property": "revenue_state",
+      "derivation_rule": "R1",
+      "confidence": "HIGH",
+      "alternates": "hs_manual_forecast_category",
+      "trap_never_use": "",
+      "hubsql": "SELECT revenue_state, SUM(amount_in_home_currency) FROM DEAL GROUP BY revenue_state",
+      "copy_paste_prompt": "Total amount_in_home_currency by revenue_state."
+    },
+    {
+      "id": "P16",
+      "intent": "Deals by owner / rep / salesperson; 'my deals'",
+      "trigger_tokens": "owner, rep, salesperson, who owns, my, mine",
+      "object": "DEAL",
+      "property": "hubspot_owner_id",
+      "derivation_rule": "R9",
+      "confidence": "HIGH",
+      "alternates": "hs_all_collaborator_owner_ids, hubspot_team_id",
+      "trap_never_use": "team (free text)",
+      "hubsql": "SELECT hubspot_owner_id, COUNT(*), SUM(amount_in_home_currency) FROM DEAL WHERE hs_is_closed = false GROUP BY hubspot_owner_id",
+      "copy_paste_prompt": "Open deals per hubspot_owner_id with SUM(amount_in_home_currency); resolve owner IDs to names."
+    },
+    {
+      "id": "P17",
+      "intent": "Deals by sales team",
+      "trigger_tokens": "team, sales emea, sales noram, sales apac, sales taiwan, sq sales",
+      "object": "DEAL",
+      "property": "hubspot_team_id",
+      "derivation_rule": "R1",
+      "confidence": "HIGH",
+      "alternates": "sales_region",
+      "trap_never_use": "team (free-text custom)",
+      "hubsql": "SELECT hubspot_team_id, SUM(amount_in_home_currency) FROM DEAL WHERE hs_is_closed = false GROUP BY hubspot_team_id",
+      "copy_paste_prompt": "Open pipeline by hubspot_team_id."
+    },
+    {
+      "id": "P18",
+      "intent": "Deals by region",
+      "trigger_tokens": "region, emea, apac, noram, taiwan, americas, europe, asia",
+      "object": "DEAL",
+      "property": "sales_region",
+      "derivation_rule": "R1",
+      "confidence": "HIGH",
+      "alternates": "hubspot_team_id, COMPANY.country",
+      "trap_never_use": "",
+      "hubsql": "SELECT sales_region, COUNT(*), SUM(amount_in_home_currency) FROM DEAL WHERE hs_is_closed = false GROUP BY sales_region",
+      "copy_paste_prompt": "Open deals by sales_region."
+    },
+    {
+      "id": "P19",
+      "intent": "Channel: distributor vs direct vs rep vs web",
+      "trigger_tokens": "channel, distributor, disti, direct, rep, web, var",
+      "object": "DEAL",
+      "property": "opp_cust___channel_var__new_",
+      "derivation_rule": "R1 + R3",
+      "confidence": "HIGH",
+      "alternates": "channel_name__dist_rep_ (which distributor)",
+      "trap_never_use": "channel_var (old free text)",
+      "hubsql": "SELECT opp_cust___channel_var__new_, COUNT(*) FROM DEAL GROUP BY opp_cust___channel_var__new_",
+      "copy_paste_prompt": "Deals by opp_cust___channel_var__new_."
+    },
+    {
+      "id": "P20",
+      "intent": "Final customer / end customer / sold-to",
+      "trigger_tokens": "final customer, end customer, oem, sold-to, who buys",
+      "object": "DEAL",
+      "property": "final_customer (end) / sold_to (buyer)",
+      "derivation_rule": "R2",
+      "confidence": "MEDIUM (free text → LIKE)",
+      "alternates": "COMPANY.name (associated company)",
+      "trap_never_use": "",
+      "hubsql": "SELECT dealname, sold_to, final_customer, COMPANY.name FROM DEAL WHERE final_customer LIKE '%Bosch%'",
+      "copy_paste_prompt": "Deals where final_customer contains 'Bosch', showing sold_to and the associated COMPANY.name."
+    },
+    {
+      "id": "P21",
+      "intent": "New vs existing customer",
+      "trigger_tokens": "new business, new customer, existing, recurrent, upsell",
+      "object": "DEAL",
+      "property": "dealtype",
+      "derivation_rule": "R1",
+      "confidence": "HIGH",
+      "alternates": "new_lead__",
+      "trap_never_use": "",
+      "hubsql": "SELECT dealtype, COUNT(*) FROM DEAL GROUP BY dealtype",
+      "copy_paste_prompt": "Deals by dealtype (newbusiness / existingbusiness / existingbusinessre)."
+    },
+    {
+      "id": "P22",
+      "intent": "Entity split: IC'Alps vs SEALSQ; Wisekey vs Seal",
+      "trigger_tokens": "icalps, ic'alps, sealsq, wisekey, seal, entity, attribution",
+      "object": "DEAL",
+      "property": "icalps__sealsq / wisekey___seal",
+      "derivation_rule": "R1",
+      "confidence": "HIGH",
+      "alternates": "pipeline",
+      "trap_never_use": "wk_vs_seal (free text)",
+      "hubsql": "SELECT icalps__sealsq, SUM(amount_in_home_currency) FROM DEAL GROUP BY icalps__sealsq",
+      "copy_paste_prompt": "Total amount_in_home_currency by icalps__sealsq."
+    },
+    {
+      "id": "P23",
+      "intent": "Requirement flags: PQC / FIPS / military / VaultiTrust provisioning / competitor TPM",
+      "trigger_tokens": "pqc, post-quantum, fips, military, defense, provisioning, vaultitrust, competitor tpm",
+      "object": "DEAL",
+      "property": "pqc_required / fips_required / military_application / vaultitrust_ / using_tpm_from_competition",
+      "derivation_rule": "R2 (label match; enum values differ: YES/NO vs Yes/No vs true/false)",
+      "confidence": "HIGH",
+      "alternates": "",
+      "trap_never_use": "Case matters: pqc_required uses 'YES', fips_required uses 'Yes', vaultitrust_ uses 'true'",
+      "hubsql": "SELECT COUNT(*) FROM DEAL WHERE pqc_required = 'YES'",
+      "copy_paste_prompt": "Count deals where pqc_required = 'YES'; separately fips_required = 'Yes'; military_application = 'Yes'; vaultitrust_ = 'true'."
+    },
+    {
+      "id": "P24",
+      "intent": "Milestone dates: identified / qualified / design-in / design-win / closed won / mass production",
+      "trigger_tokens": "when identified, design win date, design in date, mass production, production date, decision date",
+      "object": "DEAL",
+      "property": "identified_date, qualified_date, design_in_date, design_win_date, closed_won_date, closed_lost_date, closed_dead_date, mass_production_date, expected_production_date, expected_decision_date",
+      "derivation_rule": "R2 (labels 'DATE - n. …')",
+      "confidence": "HIGH",
+      "alternates": "hs_v2_date_entered_<stageId> (system), deal_date_* (duplicates)",
+      "trap_never_use": "negotiate_date is actually 'DATE - 3.a Design In (Services Only)'",
+      "hubsql": "SELECT dealname, design_win_date FROM DEAL WHERE design_win_date BETWEEN '2026-01-01' AND '2026-12-31'",
+      "copy_paste_prompt": "Deals with design_win_date in 2026 (hardware design wins)."
+    },
+    {
+      "id": "P25",
+      "intent": "Closing when / close date / expected close",
+      "trigger_tokens": "close date, closing, expected close, this quarter",
+      "object": "DEAL",
+      "property": "closedate",
+      "derivation_rule": "R2 + R10",
+      "confidence": "HIGH",
+      "alternates": "icalps_targetclose (legacy), expected_decision_date",
+      "trap_never_use": "",
+      "hubsql": "SELECT dealname, amount_in_home_currency FROM DEAL WHERE hs_is_closed = false AND closedate BETWEEN '2026-10-01' AND '2026-12-31'",
+      "copy_paste_prompt": "Open deals with closedate in Q4 2026."
+    },
+    {
+      "id": "P26",
+      "intent": "Deal creation trend",
+      "trigger_tokens": "created, new deals per month, creation",
+      "object": "DEAL",
+      "property": "createdate",
+      "derivation_rule": "R2",
+      "confidence": "HIGH",
+      "alternates": "identified_date",
+      "trap_never_use": "",
+      "hubsql": "SELECT DATE_TRUNC(createdate, 'MONTH'), COUNT(*) FROM DEAL WHERE createdate BETWEEN '2026-01-01' AND '2026-12-31' GROUP BY DATE_TRUNC(createdate, 'MONTH')",
+      "copy_paste_prompt": "Deals created per month in 2026."
+    },
+    {
+      "id": "P27",
+      "intent": "Inactive / dormant / no recent activity",
+      "trigger_tokens": "inactive, dormant, no activity, untouched, stale",
+      "object": "DEAL",
+      "property": "notes_last_updated",
+      "derivation_rule": "R2",
+      "confidence": "HIGH",
+      "alternates": "notes_last_contacted, hs_is_stalled, num_contacted_notes",
+      "trap_never_use": "",
+      "hubsql": "SELECT dealname, hubspot_owner_id, notes_last_updated FROM DEAL WHERE hs_is_closed = false AND notes_last_updated < '2026-06-16'",
+      "copy_paste_prompt": "Open deals with notes_last_updated older than 90 days."
+    },
+    {
+      "id": "P28",
+      "intent": "Stalled / aging in stage",
+      "trigger_tokens": "stalled, stuck, aging, too long in stage",
+      "object": "DEAL",
+      "property": "hs_is_stalled / hs_v2_date_entered_current_stage",
+      "derivation_rule": "R2",
+      "confidence": "HIGH",
+      "alternates": "hs_v2_time_in_current_stage, hs_v2_latest_time_in_<stageId>",
+      "trap_never_use": "",
+      "hubsql": "SELECT dealname, dealstage, hs_v2_date_entered_current_stage FROM DEAL WHERE hs_is_stalled = true",
+      "copy_paste_prompt": "Open deals where hs_is_stalled = true, with date entered current stage."
+    },
+    {
+      "id": "P29",
+      "intent": "Next steps / next activity",
+      "trigger_tokens": "next step, next activity, follow-up",
+      "object": "DEAL",
+      "property": "hs_next_step / notes_next_activity_date",
+      "derivation_rule": "R2",
+      "confidence": "HIGH",
+      "alternates": "hs_next_meeting_start_time",
+      "trap_never_use": "",
+      "hubsql": "SELECT dealname, hs_next_step, notes_next_activity_date FROM DEAL WHERE hs_is_closed = false",
+      "copy_paste_prompt": "Open deals with hs_next_step and notes_next_activity_date."
+    },
+    {
+      "id": "P30",
+      "intent": "Priority deals",
+      "trigger_tokens": "priority, high priority, urgent",
+      "object": "DEAL",
+      "property": "hs_priority",
+      "derivation_rule": "R1",
+      "confidence": "HIGH",
+      "alternates": "hs_manual_forecast_category",
+      "trap_never_use": "",
+      "hubsql": "SELECT dealname, amount_in_home_currency FROM DEAL WHERE hs_priority = 'high' AND hs_is_closed = false",
+      "copy_paste_prompt": "Open deals with hs_priority = 'high'."
+    },
+    {
+      "id": "P31",
+      "intent": "Quote status",
+      "trigger_tokens": "quote, quotation, quoted",
+      "object": "DEAL",
+      "property": "quote_status",
+      "derivation_rule": "R1",
+      "confidence": "HIGH",
+      "alternates": "",
+      "trap_never_use": "",
+      "hubsql": "SELECT quote_status, COUNT(*) FROM DEAL GROUP BY quote_status",
+      "copy_paste_prompt": "Deals by quote_status."
+    },
+    {
+      "id": "P32",
+      "intent": "Sales cycle / days to close / velocity",
+      "trigger_tokens": "sales cycle, days to close, velocity, how long",
+      "object": "DEAL",
+      "property": "days_to_close",
+      "derivation_rule": "R2",
+      "confidence": "HIGH",
+      "alternates": "hs_actual_duration, design_in_cycle_time, qualification_cycle_time",
+      "trap_never_use": "",
+      "hubsql": "SELECT pipeline, AVG(days_to_close), MEDIAN(days_to_close) FROM DEAL WHERE hs_is_closed_won = true GROUP BY pipeline",
+      "copy_paste_prompt": "Average and median days_to_close for won deals by pipeline."
+    },
+    {
+      "id": "P33",
+      "intent": "Deal with its company / account",
+      "trigger_tokens": "company, account, customer name, which company",
+      "object": "DEAL→COMPANY",
+      "property": "COMPANY.name (cross-object)",
+      "derivation_rule": "R8",
+      "confidence": "HIGH",
+      "alternates": "sold_to, final_customer",
+      "trap_never_use": "associations.COMPANY in SELECT (not allowed)",
+      "hubsql": "SELECT dealname, COMPANY.name, amount_in_home_currency FROM DEAL WHERE hs_is_closed = false",
+      "copy_paste_prompt": "Open deals with their associated COMPANY.name."
+    },
+    {
+      "id": "P34",
+      "intent": "Deals for a given company",
+      "trigger_tokens": "deals at company X, account X pipeline",
+      "object": "DEAL→COMPANY",
+      "property": "COMPANY.name in WHERE",
+      "derivation_rule": "R8",
+      "confidence": "HIGH",
+      "alternates": "COMPANY.domain",
+      "trap_never_use": "",
+      "hubsql": "SELECT dealname, dealstage, amount_in_home_currency FROM DEAL WHERE COMPANY.name LIKE '%Alcom%'",
+      "copy_paste_prompt": "Deals whose associated COMPANY.name contains 'Alcom'."
+    },
+    {
+      "id": "P35",
+      "intent": "Deals with no company / no contact",
+      "trigger_tokens": "orphan, no company, no contact",
+      "object": "DEAL",
+      "property": "associations.COMPANY IS NULL / num_associated_contacts = 0",
+      "derivation_rule": "R8",
+      "confidence": "HIGH",
+      "alternates": "",
+      "trap_never_use": "",
+      "hubsql": "SELECT dealname FROM DEAL WHERE hs_is_closed = false AND associations.COMPANY IS NULL",
+      "copy_paste_prompt": "Open deals with no associated company."
+    },
+    {
+      "id": "P36",
+      "intent": "Deals with no product assigned (data quality)",
+      "trigger_tokens": "unassigned product, missing product, no product",
+      "object": "DEAL",
+      "property": "prod___product_name_new_ IS NULL",
+      "derivation_rule": "R1 + data quality (822 deals today)",
+      "confidence": "HIGH",
+      "alternates": "",
+      "trap_never_use": "",
+      "hubsql": "SELECT hubspot_owner_id, COUNT(*) FROM DEAL WHERE prod___product_name_new_ IS NULL AND hs_is_closed = false GROUP BY hubspot_owner_id",
+      "copy_paste_prompt": "Open deals with prod___product_name_new_ IS NULL, grouped by owner."
+    },
+    {
+      "id": "P37",
+      "intent": "Company type / status / source",
+      "trigger_tokens": "prospect, customer, supplier, agent, active company, archived, lead source",
+      "object": "COMPANY",
+      "property": "icalps_companytype / icalps_companystatus / icalps_compsource",
+      "derivation_rule": "R1",
+      "confidence": "HIGH",
+      "alternates": "lifecyclestage (contacts)",
+      "trap_never_use": "",
+      "hubsql": "SELECT icalps_companytype, icalps_companystatus, COUNT(*) FROM COMPANY GROUP BY icalps_companytype, icalps_companystatus",
+      "copy_paste_prompt": "Companies by icalps_companytype and icalps_companystatus."
+    },
+    {
+      "id": "P38",
+      "intent": "Company industry / segment",
+      "trigger_tokens": "industry, sector, segment, vertical, iot, medical, automotive",
+      "object": "COMPANY",
+      "property": "industry (HubSpot) / icalps_industry_drill_down (ICALPS) / comp_sector / market_segment",
+      "derivation_rule": "R1 / R2",
+      "confidence": "MEDIUM (4 candidates)",
+      "alternates": "",
+      "trap_never_use": "icalps_company_sector does not exist",
+      "hubsql": "SELECT icalps_industry_drill_down, COUNT(*) FROM COMPANY GROUP BY icalps_industry_drill_down",
+      "copy_paste_prompt": "Companies by icalps_industry_drill_down; also by industry."
+    },
+    {
+      "id": "P39",
+      "intent": "Company size / country",
+      "trigger_tokens": "employees, headcount, size, country",
+      "object": "COMPANY",
+      "property": "icalps_comp_numemployees / country",
+      "derivation_rule": "R2",
+      "confidence": "HIGH",
+      "alternates": "numberofemployees (HubSpot std), icalps_address_country",
+      "trap_never_use": "",
+      "hubsql": "SELECT country, COUNT(*) FROM COMPANY WHERE icalps_companytype = 'Customer' GROUP BY country",
+      "copy_paste_prompt": "Customer companies by country."
+    },
+    {
+      "id": "P40",
+      "intent": "Contact status / lifecycle / marketing",
+      "trigger_tokens": "active contact, lead, mql, sql, marketing contact, subscribed",
+      "object": "CONTACT",
+      "property": "icalps_contactstatus / lifecyclestage / hs_marketable_status / hs_lead_status",
+      "derivation_rule": "R1",
+      "confidence": "HIGH",
+      "alternates": "",
+      "trap_never_use": "icalps_contactstatus has 4 mixed values (true/false/active/inactive)",
+      "hubsql": "SELECT lifecyclestage, COUNT(*) FROM CONTACT GROUP BY lifecyclestage",
+      "copy_paste_prompt": "Contacts by lifecyclestage."
+    },
+    {
+      "id": "P41",
+      "intent": "Contact job title / language / email validity",
+      "trigger_tokens": "job title, cto, ceo, language, french, invalid email",
+      "object": "CONTACT",
+      "property": "jobtitle / hs_language / email_valid",
+      "derivation_rule": "R2",
+      "confidence": "HIGH",
+      "alternates": "icalps_language (text)",
+      "trap_never_use": "",
+      "hubsql": "SELECT firstname, lastname, email FROM CONTACT WHERE jobtitle LIKE '%CTO%' AND email_valid = 'true'",
+      "copy_paste_prompt": "Contacts with jobtitle containing 'CTO' and email_valid = 'true'."
+    },
+    {
+      "id": "P42",
+      "intent": "Ticket status / priority / category",
+      "trigger_tokens": "open tickets, urgent, waiting on us, product issue, support",
+      "object": "TICKET",
+      "property": "hs_pipeline_stage / hs_ticket_priority / hs_ticket_category",
+      "derivation_rule": "R1",
+      "confidence": "HIGH",
+      "alternates": "hs_pipeline (Support vs External)",
+      "trap_never_use": "icalps_case_* names do not exist; live: icalps_ticketstage",
+      "hubsql": "SELECT hs_pipeline_stage, hs_ticket_priority, COUNT(*) FROM TICKET GROUP BY hs_pipeline_stage, hs_ticket_priority",
+      "copy_paste_prompt": "Tickets by hs_pipeline_stage and hs_ticket_priority."
+    },
+    {
+      "id": "P43",
+      "intent": "Activities: calls / meetings / tasks / notes volume and outcomes",
+      "trigger_tokens": "calls, meetings, tasks, notes, logged, outcome, overdue",
+      "object": "CALL / MEETING / TASK / NOTE",
+      "property": "hs_call_disposition / hs_meeting_outcome / hs_task_status + hs_task_missed_due_date / hs_note_body",
+      "derivation_rule": "R2 (ontology mapping)",
+      "confidence": "MEDIUM (not re-verified)",
+      "alternates": "hs_timestamp for dates",
+      "trap_never_use": "",
+      "hubsql": "SELECT hs_call_disposition, COUNT(*) FROM CALL WHERE hs_timestamp BETWEEN '2026-09-01' AND '2026-09-30' GROUP BY hs_call_disposition",
+      "copy_paste_prompt": "Calls this month by hs_call_disposition."
+    }
+  ],
+  "object_examples": {
+    "COMPANY": [
+      [
+        "Which company type is each account? (prospect/customer/supplier/agent)",
+        "SELECT icalps_companytype, COUNT(*) FROM COMPANY GROUP BY icalps_companytype",
+        "icalps_companytype"
+      ],
+      [
+        "Active customers in the IoT segment?",
+        "SELECT name FROM COMPANY WHERE icalps_companystatus = 'Active' AND icalps_industry_drill_down = 'IoT'",
+        "icalps_companystatus + icalps_industry_drill_down"
+      ],
+      [
+        "Companies by HubSpot industry?",
+        "SELECT industry, COUNT(*) FROM COMPANY GROUP BY industry",
+        "industry"
+      ],
+      [
+        "Companies from the Electronica 24 show?",
+        "SELECT name FROM COMPANY WHERE icalps_compsource = 'Electronica 24'",
+        "icalps_compsource"
+      ],
+      [
+        "Companies with 500+ employees owned by Marc Sanchez?",
+        "SELECT name FROM COMPANY WHERE icalps_comp_numemployees = '501+' AND hubspot_owner_id = '62919224'",
+        "icalps_comp_numemployees + hubspot_owner_id"
+      ],
+      [
+        "Companies in Germany with open deals?",
+        "SELECT name, country FROM COMPANY WHERE country = 'Germany' AND associations.DEAL IS NOT NULL",
+        "country + associations.DEAL"
+      ],
+      [
+        "Open deals with their company name (cross-object)",
+        "SELECT dealname, COMPANY.name, amount_in_home_currency FROM DEAL WHERE hs_is_closed = false",
+        "COMPANY.name from DEAL"
+      ]
+    ],
+    "CONTACT": [
+      [
+        "Active contacts at customer companies?",
+        "SELECT firstname, lastname, email FROM CONTACT WHERE icalps_contactstatus = 'active' AND COMPANY.icalps_companytype = 'Customer'",
+        "icalps_contactstatus + COMPANY.icalps_companytype"
+      ],
+      [
+        "Contacts by lifecycle stage?",
+        "SELECT lifecyclestage, COUNT(*) FROM CONTACT GROUP BY lifecyclestage",
+        "lifecyclestage"
+      ],
+      [
+        "Marketing contacts speaking French?",
+        "SELECT COUNT(*) FROM CONTACT WHERE hs_marketable_status = 'true' AND hs_language = 'fr'",
+        "hs_marketable_status + hs_language"
+      ],
+      [
+        "Contacts with an invalid email?",
+        "SELECT email FROM CONTACT WHERE email_valid = 'false'",
+        "email_valid"
+      ],
+      [
+        "Contacts with job title containing CTO?",
+        "SELECT firstname, lastname, jobtitle FROM CONTACT WHERE jobtitle LIKE '%CTO%'",
+        "jobtitle"
+      ]
+    ],
+    "TICKET": [
+      [
+        "Open tickets by status?",
+        "SELECT hs_pipeline_stage, COUNT(*) FROM TICKET WHERE hs_pipeline_stage != '4' AND hs_pipeline_stage != '1211682158' GROUP BY hs_pipeline_stage",
+        "hs_pipeline_stage"
+      ],
+      [
+        "Urgent product-issue tickets?",
+        "SELECT subject, createdate FROM TICKET WHERE hs_ticket_priority = 'URGENT' AND hs_ticket_category = 'PRODUCT_ISSUE'",
+        "hs_ticket_priority + hs_ticket_category"
+      ],
+      [
+        "Tickets created per month in 2026?",
+        "SELECT DATE_TRUNC(createdate, 'MONTH'), COUNT(*) FROM TICKET WHERE createdate BETWEEN '2026-01-01' AND '2026-12-31' GROUP BY DATE_TRUNC(createdate, 'MONTH')",
+        "createdate"
+      ],
+      [
+        "IC'Alps-origin tickets by legacy stage?",
+        "SELECT icalps_ticketstage, COUNT(*) FROM TICKET WHERE is_icalps = 'true' GROUP BY icalps_ticketstage",
+        "is_icalps + icalps_ticketstage"
+      ]
+    ],
+    "CALL / MEETING / NOTE / TASK": [
+      [
+        "Calls logged this month by outcome?",
+        "SELECT hs_call_disposition, COUNT(*) FROM CALL WHERE hs_timestamp BETWEEN '2026-09-01' AND '2026-09-30' GROUP BY hs_call_disposition",
+        "hs_call_disposition"
+      ],
+      [
+        "Meetings by outcome this quarter?",
+        "SELECT hs_meeting_outcome, COUNT(*) FROM MEETING WHERE hs_meeting_end_time BETWEEN '2026-07-01' AND '2026-09-30' GROUP BY hs_meeting_outcome",
+        "hs_meeting_outcome"
+      ],
+      [
+        "Overdue tasks that missed their due date?",
+        "SELECT hs_task_subject, hs_timestamp FROM TASK WHERE hs_task_missed_due_date = true AND hs_task_status != 'COMPLETED'",
+        "hs_task_missed_due_date + hs_task_status"
+      ],
+      [
+        "Notes created last week?",
+        "SELECT hs_note_body FROM NOTE WHERE hs_createdate BETWEEN '2026-09-07' AND '2026-09-13'",
+        "hs_createdate"
+      ]
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "uid": "icalps_new_contact_card_company",
+  "type": "card",
+  "config": {
+    "name": "IcAlps: Create contact (from company)",
+    "location": "crm.record.tab",
+    "entrypoint": "/app/cards/NewIcAlpsContactCard.tsx",
+    "objectTypes": ["companies"]
+  }
+}

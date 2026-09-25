@@ -1,0 +1,52 @@
+{
+  "uid": "hermes_trigger",
+  "type": "workflow-action",
+  "config": {
+    "actionUrl": "https://agent.example.com/hooks/hubspot",
+    "isPublished": true,
+    "supportedClients": [{ "client": "WORKFLOWS" }],
+    "objectTypes": ["CONTACT", "COMPANY", "DEAL"],
+    "inputFields": [
+      {
+        "typeDefinition": {
+          "name": "hermes_action",
+          "type": "enumeration",
+          "fieldType": "select",
+          "options": [
+            { "value": "deal_review", "label": "Deal review" },
+            { "value": "contact_enrich", "label": "Contact enrichment" },
+            { "value": "company_brief", "label": "Company brief" },
+            { "value": "revops_digest", "label": "RevOps digest run" },
+            { "value": "custom", "label": "Custom instruction" }
+          ]
+        },
+        "supportedValueTypes": ["STATIC_VALUE"],
+        "isRequired": true
+      },
+      {
+        "typeDefinition": {
+          "name": "hermes_prompt",
+          "type": "string",
+          "fieldType": "textarea"
+        },
+        "supportedValueTypes": ["STATIC_VALUE"],
+        "isRequired": false
+      }
+    ],
+    "labels": {
+      "en": {
+        "actionName": "Trigger Hermes Agent",
+        "actionDescription": "Queue a task for the autonomous Hermes agent on the VPS. The agent works asynchronously and writes its result back to the record as a Note.",
+        "actionCardContent": "Hermes agent: {{hermes_action}}",
+        "inputFieldLabels": {
+          "hermes_action": "Agent action",
+          "hermes_prompt": "Custom instruction"
+        },
+        "inputFieldDescriptions": {
+          "hermes_action": "Which task template the agent runs.",
+          "hermes_prompt": "Required when Agent action is 'Custom instruction'; ignored otherwise."
+        }
+      }
+    }
+  }
+}

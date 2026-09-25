@@ -1,0 +1,10 @@
+{
+  "uid": "icalps_new_deal_card_contact",
+  "type": "card",
+  "config": {
+    "name": "IcAlps: Create deal (from contact)",
+    "location": "crm.record.tab",
+    "entrypoint": "/app/cards/NewIcAlpsDealCard.tsx",
+    "objectTypes": ["contacts"]
+  }
+}

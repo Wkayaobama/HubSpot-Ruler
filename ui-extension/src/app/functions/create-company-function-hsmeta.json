@@ -1,0 +1,8 @@
+{
+  "uid": "create_icalps_company",
+  "type": "app-function",
+  "config": {
+    "entrypoint": "/app/functions/createIcAlpsCompany.js",
+    "secretKeys": []
+  }
+}
