@@ -1,0 +1,435 @@
+{
+  "name": "wecan_contacts_export",
+  "entity": "WECAN",
+  "object": "contacts",
+  "file": "entities/WECAN/sources/wecan_contacts_export.csv",
+  "source_system": "hubspot-export",
+  "encoding": "utf-8-sig",
+  "delimiter": ",",
+  "header_row": 1,
+  "key_columns": [
+    "Record ID",
+    "Email"
+  ],
+  "defaults": {},
+  "mappings": [
+    {
+      "column": "Record ID",
+      "role": "key",
+      "property": null,
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "auto",
+      "score": 0.0,
+      "evidence": [
+        "record identifier of the source",
+        "some values lost precision in Excel (1.3E+11)"
+      ],
+      "candidates": [],
+      "proposed_property": null
+    },
+    {
+      "column": "First Name",
+      "role": "property",
+      "property": "firstname",
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "auto",
+      "score": 1.0,
+      "evidence": [
+        "exact label",
+        "type text~string"
+      ],
+      "candidates": [
+        {
+          "property": "firstname",
+          "label": "First Name",
+          "type": "string",
+          "score": 1.0,
+          "evidence": [
+            "exact label",
+            "type text~string"
+          ],
+          "read_only": false
+        }
+      ],
+      "proposed_property": null
+    },
+    {
+      "column": "Last Name",
+      "role": "property",
+      "property": "lastname",
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "auto",
+      "score": 1.0,
+      "evidence": [
+        "exact label",
+        "type text~string"
+      ],
+      "candidates": [
+        {
+          "property": "lastname",
+          "label": "Last Name",
+          "type": "string",
+          "score": 1.0,
+          "evidence": [
+            "exact label",
+            "type text~string"
+          ],
+          "read_only": false
+        }
+      ],
+      "proposed_property": null
+    },
+    {
+      "column": "name",
+      "role": "property",
+      "property": "wecan_name",
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property wecan_name",
+        "low fill 2.9%"
+      ],
+      "candidates": [
+        {
+          "property": "firstname",
+          "label": "First Name",
+          "type": "string",
+          "score": 0.35,
+          "evidence": [
+            "token overlap 0.5",
+            "type text~string"
+          ],
+          "read_only": false
+        },
+        {
+          "property": "lastname",
+          "label": "Last Name",
+          "type": "string",
+          "score": 0.35,
+          "evidence": [
+            "token overlap 0.5",
+            "type text~string"
+          ],
+          "read_only": false
+        },
+        {
+          "property": "company",
+          "label": "Company Name",
+          "type": "string",
+          "score": 0.35,
+          "evidence": [
+            "token overlap 0.5",
+            "type text~string"
+          ],
+          "read_only": false
+        }
+      ],
+      "proposed_property": {
+        "name": "wecan_name",
+        "label": "WECAN name",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "wecaninformation",
+        "description": "Ad-hoc source 'wecan_contacts_export', column 'name' (inferred text, fill 3%)",
+        "objectType": "contacts",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "Email",
+      "role": "property",
+      "property": "email",
+      "target_object": null,
+      "match_by": null,
+      "transform": "lower",
+      "decision": "auto",
+      "score": 1.0,
+      "evidence": [
+        "exact name",
+        "type email~string"
+      ],
+      "candidates": [
+        {
+          "property": "email",
+          "label": "Email",
+          "type": "string",
+          "score": 1.0,
+          "evidence": [
+            "exact name",
+            "type email~string"
+          ],
+          "read_only": false
+        }
+      ],
+      "proposed_property": null
+    },
+    {
+      "column": "Phone Number",
+      "role": "property",
+      "property": "wecan_phone_number",
+      "target_object": null,
+      "match_by": null,
+      "transform": "phone",
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property wecan_phone_number"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "wecan_phone_number",
+        "label": "WECAN Phone Number",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "wecaninformation",
+        "description": "Ad-hoc source 'wecan_contacts_export', column 'Phone Number' (inferred phone, fill 21%)",
+        "objectType": "contacts",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "Contact owner",
+      "role": "lookup",
+      "property": "hubspot_owner_id",
+      "target_object": null,
+      "match_by": "owner_name",
+      "transform": null,
+      "decision": "review",
+      "score": 1.0,
+      "evidence": [
+        "exact label",
+        "type text~enumeration",
+        "values are people, resolve through the owners API"
+      ],
+      "candidates": [
+        {
+          "property": "hubspot_owner_id",
+          "label": "Contact owner",
+          "type": "enumeration",
+          "score": 1.0,
+          "evidence": [
+            "exact label",
+            "type text~enumeration"
+          ],
+          "read_only": false
+        }
+      ],
+      "proposed_property": {
+        "name": "wecan_contact_owner",
+        "label": "WECAN Contact owner",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "wecaninformation",
+        "description": "Ad-hoc source 'wecan_contacts_export', column 'Contact owner' (inferred text, fill 72%)",
+        "objectType": "contacts",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "Primary Associated Company ID",
+      "role": "derived",
+      "property": null,
+      "target_object": "companies",
+      "match_by": null,
+      "transform": null,
+      "decision": "auto",
+      "score": 0.0,
+      "evidence": [
+        "feeds the derived object"
+      ],
+      "candidates": [],
+      "proposed_property": null
+    },
+    {
+      "column": "Last Activity Date",
+      "role": "property",
+      "property": "wecan_last_activity_date",
+      "target_object": null,
+      "match_by": null,
+      "transform": "datetime",
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "best match lastmodifieddate is read-only in HubSpot; keep the value in the entity namespace",
+        "proposed new property wecan_last_activity_date"
+      ],
+      "candidates": [
+        {
+          "property": "lastmodifieddate",
+          "label": "Last Modified Date",
+          "type": "datetime",
+          "score": 0.35,
+          "evidence": [
+            "token overlap 0.5",
+            "type datetime~datetime",
+            "read-only in HubSpot"
+          ],
+          "read_only": true
+        }
+      ],
+      "proposed_property": {
+        "name": "wecan_last_activity_date",
+        "label": "WECAN Last Activity Date",
+        "type": "datetime",
+        "fieldType": "date",
+        "groupName": "wecaninformation",
+        "description": "Ad-hoc source 'wecan_contacts_export', column 'Last Activity Date' (inferred datetime, fill 34%)",
+        "objectType": "contacts",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "Lead Status",
+      "role": "property",
+      "property": "hs_lead_status",
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "auto",
+      "score": 1.0,
+      "evidence": [
+        "exact label",
+        "type enum~enumeration",
+        "3/4 values are options",
+        "low fill 0.4%"
+      ],
+      "candidates": [
+        {
+          "property": "hs_lead_status",
+          "label": "Lead Status",
+          "type": "enumeration",
+          "score": 1.0,
+          "evidence": [
+            "exact label",
+            "type enum~enumeration",
+            "3/4 values are options",
+            "low fill 0.4%"
+          ],
+          "read_only": false
+        }
+      ],
+      "proposed_property": null
+    },
+    {
+      "column": "Marketing contact status",
+      "role": "property",
+      "property": "wecan_marketing_contact_status",
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property wecan_marketing_contact_status"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "wecan_marketing_contact_status",
+        "label": "WECAN Marketing contact status",
+        "type": "enumeration",
+        "fieldType": "select",
+        "groupName": "wecaninformation",
+        "description": "Ad-hoc source 'wecan_contacts_export', column 'Marketing contact status' (inferred enum, fill 100%)",
+        "objectType": "contacts",
+        "status": "proposed",
+        "options": [
+          {
+            "label": "Marketing contact",
+            "value": "Marketing contact",
+            "displayOrder": 0,
+            "hidden": false
+          },
+          {
+            "label": "Non-marketing contact",
+            "value": "Non-marketing contact",
+            "displayOrder": 1,
+            "hidden": false
+          }
+        ]
+      }
+    },
+    {
+      "column": "Create Date",
+      "role": "property",
+      "property": "wecan_create_date",
+      "target_object": null,
+      "match_by": null,
+      "transform": "datetime",
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "best match createdate is read-only in HubSpot; keep the value in the entity namespace",
+        "proposed new property wecan_create_date"
+      ],
+      "candidates": [
+        {
+          "property": "createdate",
+          "label": "Create Date",
+          "type": "datetime",
+          "score": 1.0,
+          "evidence": [
+            "exact label",
+            "type datetime~datetime",
+            "read-only in HubSpot"
+          ],
+          "read_only": true
+        }
+      ],
+      "proposed_property": {
+        "name": "wecan_create_date",
+        "label": "WECAN Create Date",
+        "type": "datetime",
+        "fieldType": "date",
+        "groupName": "wecaninformation",
+        "description": "Ad-hoc source 'wecan_contacts_export', column 'Create Date' (inferred datetime, fill 100%)",
+        "objectType": "contacts",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "Associated Company",
+      "role": "derived",
+      "property": null,
+      "target_object": "companies",
+      "match_by": null,
+      "transform": null,
+      "decision": "auto",
+      "score": 0.0,
+      "evidence": [
+        "feeds the derived object"
+      ],
+      "candidates": [],
+      "proposed_property": null
+    }
+  ],
+  "derived": [
+    {
+      "object": "companies",
+      "key_column": "Primary Associated Company ID",
+      "name_column": "Associated Company",
+      "columns": {},
+      "match_by": "name",
+      "association_type_id": 1,
+      "association_reverse_type_id": 2,
+      "association_label": "Primary",
+      "secondary_type_id": 279,
+      "secondary_reverse_type_id": 280
+    }
+  ],
+  "status": "planned",
+  "generated_by": "hs-logic sources.match 2026-09-26T19:51:42Z",
+  "notes": [
+    "derived companies from key 'Primary Associated Company ID' and name 'Associated Company' (association type 1)",
+    "'Record ID': values in scientific notation lost precision; re-export as text before loading",
+    "composite key 'Record ID' + 'Email' because the identifier lost precision in Excel; rows without an email may still collide"
+  ]
+}

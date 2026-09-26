@@ -1,0 +1,506 @@
+{
+  "name": "miraex_drive_deals",
+  "entity": "MIRAEX",
+  "object": "deals",
+  "file": "entities/MIRAEX/sources/miraex_drive_deals.csv",
+  "source_system": "drive-scan",
+  "encoding": "utf-8-sig",
+  "delimiter": ",",
+  "header_row": 0,
+  "key_columns": [
+    "legacy_deal_id"
+  ],
+  "defaults": {},
+  "mappings": [
+    {
+      "column": "deal_node_key",
+      "role": "property",
+      "property": "miraex_deal_node_key",
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property miraex_deal_node_key"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "miraex_deal_node_key",
+        "label": "MIRAEX deal_node_key",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'deal_node_key' (inferred id, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "legacy_deal_id",
+      "role": "key",
+      "property": "miraex_legacy_deal_id",
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property miraex_legacy_deal_id",
+        "chosen as key: unique and filled"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "miraex_legacy_deal_id",
+        "label": "MIRAEX legacy_deal_id",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'legacy_deal_id' (inferred id, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "deal_name",
+      "role": "property",
+      "property": "dealname",
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "auto",
+      "score": 1.0,
+      "evidence": [
+        "exact label",
+        "type text~string"
+      ],
+      "candidates": [
+        {
+          "property": "dealname",
+          "label": "Deal Name",
+          "type": "string",
+          "score": 1.0,
+          "evidence": [
+            "exact label",
+            "type text~string"
+          ],
+          "read_only": false
+        }
+      ],
+      "proposed_property": null
+    },
+    {
+      "column": "anchor_kind",
+      "role": "property",
+      "property": "miraex_anchor_kind",
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property miraex_anchor_kind"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "miraex_anchor_kind",
+        "label": "MIRAEX anchor_kind",
+        "type": "enumeration",
+        "fieldType": "select",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'anchor_kind' (inferred enum, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed",
+        "options": [
+          {
+            "label": "file",
+            "value": "file",
+            "displayOrder": 0,
+            "hidden": false
+          },
+          {
+            "label": "folder",
+            "value": "folder",
+            "displayOrder": 1,
+            "hidden": false
+          }
+        ]
+      }
+    },
+    {
+      "column": "company_node_key",
+      "role": "derived",
+      "property": null,
+      "target_object": "companies",
+      "match_by": null,
+      "transform": null,
+      "decision": "auto",
+      "score": 0.0,
+      "evidence": [
+        "feeds the derived object"
+      ],
+      "candidates": [],
+      "proposed_property": null
+    },
+    {
+      "column": "legacy_company_id",
+      "role": "derived",
+      "property": null,
+      "target_object": "companies",
+      "match_by": null,
+      "transform": null,
+      "decision": "auto",
+      "score": 0.0,
+      "evidence": [
+        "feeds the derived object"
+      ],
+      "candidates": [],
+      "proposed_property": null
+    },
+    {
+      "column": "company_name",
+      "role": "derived",
+      "property": null,
+      "target_object": "companies",
+      "match_by": null,
+      "transform": null,
+      "decision": "auto",
+      "score": 0.0,
+      "evidence": [
+        "feeds the derived object"
+      ],
+      "candidates": [],
+      "proposed_property": null
+    },
+    {
+      "column": "segment",
+      "role": "property",
+      "property": "miraex_segment",
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property miraex_segment"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "miraex_segment",
+        "label": "MIRAEX segment",
+        "type": "enumeration",
+        "fieldType": "select",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'segment' (inferred enum, fill 83%)",
+        "objectType": "deals",
+        "status": "proposed",
+        "options": [
+          {
+            "label": "Quantum",
+            "value": "Quantum",
+            "displayOrder": 0,
+            "hidden": false
+          }
+        ]
+      }
+    },
+    {
+      "column": "depth",
+      "role": "property",
+      "property": "miraex_depth",
+      "target_object": null,
+      "match_by": null,
+      "transform": "int",
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property miraex_depth"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "miraex_depth",
+        "label": "MIRAEX depth",
+        "type": "number",
+        "fieldType": "number",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'depth' (inferred integer, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "drive_id",
+      "role": "property",
+      "property": "miraex_drive_id",
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property miraex_drive_id"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "miraex_drive_id",
+        "label": "MIRAEX drive_id",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'drive_id' (inferred id, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "link",
+      "role": "property",
+      "property": "miraex_link",
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property miraex_link"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "miraex_link",
+        "label": "MIRAEX link",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'link' (inferred url, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "drive_created_at",
+      "role": "property",
+      "property": "miraex_drive_created_at",
+      "target_object": null,
+      "match_by": null,
+      "transform": "datetime",
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property miraex_drive_created_at"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "miraex_drive_created_at",
+        "label": "MIRAEX drive_created_at",
+        "type": "datetime",
+        "fieldType": "date",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'drive_created_at' (inferred datetime, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "drive_modified_at",
+      "role": "property",
+      "property": "miraex_drive_modified_at",
+      "target_object": null,
+      "match_by": null,
+      "transform": "datetime",
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property miraex_drive_modified_at"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "miraex_drive_modified_at",
+        "label": "MIRAEX drive_modified_at",
+        "type": "datetime",
+        "fieldType": "date",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'drive_modified_at' (inferred datetime, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "owner_email",
+      "role": "ignore",
+      "property": null,
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "ignored",
+      "score": 0.0,
+      "evidence": [
+        "no values in this export"
+      ],
+      "candidates": [],
+      "proposed_property": null
+    },
+    {
+      "column": "asset_count",
+      "role": "property",
+      "property": "miraex_asset_count",
+      "target_object": null,
+      "match_by": null,
+      "transform": "int",
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property miraex_asset_count"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "miraex_asset_count",
+        "label": "MIRAEX asset_count",
+        "type": "number",
+        "fieldType": "number",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'asset_count' (inferred integer, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "pdf_count",
+      "role": "property",
+      "property": "miraex_pdf_count",
+      "target_object": null,
+      "match_by": null,
+      "transform": "int",
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property miraex_pdf_count"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "miraex_pdf_count",
+        "label": "MIRAEX pdf_count",
+        "type": "number",
+        "fieldType": "number",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'pdf_count' (inferred integer, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "deal_candidate_count",
+      "role": "property",
+      "property": "miraex_deal_candidate_count",
+      "target_object": null,
+      "match_by": null,
+      "transform": "int",
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property miraex_deal_candidate_count"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "miraex_deal_candidate_count",
+        "label": "MIRAEX deal_candidate_count",
+        "type": "number",
+        "fieldType": "number",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'deal_candidate_count' (inferred integer, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "parked_count",
+      "role": "property",
+      "property": "miraex_parked_count",
+      "target_object": null,
+      "match_by": null,
+      "transform": "int",
+      "decision": "unmapped",
+      "score": 0.0,
+      "evidence": [
+        "proposed new property miraex_parked_count"
+      ],
+      "candidates": [],
+      "proposed_property": {
+        "name": "miraex_parked_count",
+        "label": "MIRAEX parked_count",
+        "type": "number",
+        "fieldType": "number",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'parked_count' (inferred integer, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      }
+    },
+    {
+      "column": "hs_deal_id",
+      "role": "source_id",
+      "property": null,
+      "target_object": null,
+      "match_by": "id",
+      "transform": null,
+      "decision": "ignored",
+      "score": 0.0,
+      "evidence": [
+        "identifier of a record in this portal",
+        "no values in this export; role kept for future exports"
+      ],
+      "candidates": [],
+      "proposed_property": null
+    },
+    {
+      "column": "hs_dealname",
+      "role": "lookup",
+      "property": "dealname",
+      "target_object": null,
+      "match_by": "name",
+      "transform": null,
+      "decision": "ignored",
+      "score": 0.0,
+      "evidence": [
+        "name of a record in this portal: resolve by name lookup; no values in this export"
+      ],
+      "candidates": [],
+      "proposed_property": null
+    },
+    {
+      "column": "deal_status",
+      "role": "ignore",
+      "property": null,
+      "target_object": null,
+      "match_by": null,
+      "transform": null,
+      "decision": "ignored",
+      "score": 0.0,
+      "evidence": [
+        "no values in this export"
+      ],
+      "candidates": [],
+      "proposed_property": null
+    }
+  ],
+  "derived": [
+    {
+      "object": "companies",
+      "key_column": "legacy_company_id",
+      "name_column": "company_name",
+      "columns": {
+        "company_node_key": "miraex_company_node_key"
+      },
+      "match_by": "name",
+      "association_type_id": 5,
+      "association_reverse_type_id": 6,
+      "association_label": "Primary",
+      "secondary_type_id": 341,
+      "secondary_reverse_type_id": 342
+    }
+  ],
+  "status": "planned",
+  "generated_by": "hs-logic sources.match 2026-09-26T19:51:42Z",
+  "notes": [
+    "derived companies from key 'legacy_company_id' and name 'company_name' (association type 5)"
+  ]
+}

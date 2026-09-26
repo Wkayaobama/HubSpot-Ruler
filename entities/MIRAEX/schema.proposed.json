@@ -1,0 +1,305 @@
+{
+  "entity": "MIRAEX",
+  "properties": {
+    "deals": [
+      {
+        "name": "entity_scope",
+        "label": "Entity scope",
+        "type": "enumeration",
+        "fieldType": "select",
+        "groupName": "governance",
+        "description": "Business entity the record belongs to (Phase C governance property)",
+        "objectType": "deals",
+        "status": "proposed",
+        "system": true,
+        "options": [
+          {
+            "label": "WISEKEY",
+            "value": "WISEKEY"
+          },
+          {
+            "label": "WISESAT",
+            "value": "WISESAT"
+          },
+          {
+            "label": "SEALSQ",
+            "value": "SEALSQ"
+          },
+          {
+            "label": "SEALCOIN",
+            "value": "SEALCOIN"
+          },
+          {
+            "label": "QUANTUM_AI",
+            "value": "QUANTUM_AI"
+          },
+          {
+            "label": "ICALPS",
+            "value": "ICALPS"
+          },
+          {
+            "label": "MIRAEX",
+            "value": "MIRAEX"
+          },
+          {
+            "label": "WECAN",
+            "value": "WECAN"
+          }
+        ]
+      },
+      {
+        "name": "miraex_anchor_kind",
+        "label": "MIRAEX anchor_kind",
+        "type": "enumeration",
+        "fieldType": "select",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'anchor_kind' (inferred enum, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed",
+        "options": [
+          {
+            "label": "file",
+            "value": "file",
+            "displayOrder": 0,
+            "hidden": false
+          },
+          {
+            "label": "folder",
+            "value": "folder",
+            "displayOrder": 1,
+            "hidden": false
+          }
+        ]
+      },
+      {
+        "name": "miraex_asset_count",
+        "label": "MIRAEX asset_count",
+        "type": "number",
+        "fieldType": "number",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'asset_count' (inferred integer, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      },
+      {
+        "name": "miraex_deal_candidate_count",
+        "label": "MIRAEX deal_candidate_count",
+        "type": "number",
+        "fieldType": "number",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'deal_candidate_count' (inferred integer, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      },
+      {
+        "name": "miraex_deal_node_key",
+        "label": "MIRAEX deal_node_key",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'deal_node_key' (inferred id, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      },
+      {
+        "name": "miraex_depth",
+        "label": "MIRAEX depth",
+        "type": "number",
+        "fieldType": "number",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'depth' (inferred integer, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      },
+      {
+        "name": "miraex_drive_created_at",
+        "label": "MIRAEX drive_created_at",
+        "type": "datetime",
+        "fieldType": "date",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'drive_created_at' (inferred datetime, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      },
+      {
+        "name": "miraex_drive_id",
+        "label": "MIRAEX drive_id",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'drive_id' (inferred id, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      },
+      {
+        "name": "miraex_drive_modified_at",
+        "label": "MIRAEX drive_modified_at",
+        "type": "datetime",
+        "fieldType": "date",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'drive_modified_at' (inferred datetime, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      },
+      {
+        "name": "miraex_legacy_deal_id",
+        "label": "MIRAEX legacy_deal_id",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'legacy_deal_id' (inferred id, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      },
+      {
+        "name": "miraex_link",
+        "label": "MIRAEX link",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'link' (inferred url, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      },
+      {
+        "name": "miraex_parked_count",
+        "label": "MIRAEX parked_count",
+        "type": "number",
+        "fieldType": "number",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'parked_count' (inferred integer, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      },
+      {
+        "name": "miraex_pdf_count",
+        "label": "MIRAEX pdf_count",
+        "type": "number",
+        "fieldType": "number",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'pdf_count' (inferred integer, fill 100%)",
+        "objectType": "deals",
+        "status": "proposed"
+      },
+      {
+        "name": "miraex_segment",
+        "label": "MIRAEX segment",
+        "type": "enumeration",
+        "fieldType": "select",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'segment' (inferred enum, fill 83%)",
+        "objectType": "deals",
+        "status": "proposed",
+        "options": [
+          {
+            "label": "Quantum",
+            "value": "Quantum",
+            "displayOrder": 0,
+            "hidden": false
+          }
+        ]
+      },
+      {
+        "name": "miraex_source_key",
+        "label": "MIRAEX source key",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "miraexinformation",
+        "description": "Idempotency key of the ad-hoc source row",
+        "objectType": "deals",
+        "status": "proposed",
+        "system": true
+      },
+      {
+        "name": "miraex_source_system",
+        "label": "MIRAEX source system",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "miraexinformation",
+        "description": "Which external system the record came from",
+        "objectType": "deals",
+        "status": "proposed",
+        "system": true
+      }
+    ],
+    "companies": [
+      {
+        "name": "entity_scope",
+        "label": "Entity scope",
+        "type": "enumeration",
+        "fieldType": "select",
+        "groupName": "governance",
+        "description": "Business entity the record belongs to (Phase C governance property)",
+        "objectType": "companies",
+        "status": "proposed",
+        "system": true,
+        "options": [
+          {
+            "label": "WISEKEY",
+            "value": "WISEKEY"
+          },
+          {
+            "label": "WISESAT",
+            "value": "WISESAT"
+          },
+          {
+            "label": "SEALSQ",
+            "value": "SEALSQ"
+          },
+          {
+            "label": "SEALCOIN",
+            "value": "SEALCOIN"
+          },
+          {
+            "label": "QUANTUM_AI",
+            "value": "QUANTUM_AI"
+          },
+          {
+            "label": "ICALPS",
+            "value": "ICALPS"
+          },
+          {
+            "label": "MIRAEX",
+            "value": "MIRAEX"
+          },
+          {
+            "label": "WECAN",
+            "value": "WECAN"
+          }
+        ]
+      },
+      {
+        "name": "miraex_company_node_key",
+        "label": "MIRAEX company_node_key",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "miraexinformation",
+        "description": "Ad-hoc source 'miraex_drive_deals', column 'company_node_key' on derived companies",
+        "objectType": "companies",
+        "status": "proposed"
+      },
+      {
+        "name": "miraex_source_key",
+        "label": "MIRAEX source key",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "miraexinformation",
+        "description": "Idempotency key of the ad-hoc source row",
+        "objectType": "companies",
+        "status": "proposed",
+        "system": true
+      },
+      {
+        "name": "miraex_source_system",
+        "label": "MIRAEX source system",
+        "type": "string",
+        "fieldType": "text",
+        "groupName": "miraexinformation",
+        "description": "Which external system the record came from",
+        "objectType": "companies",
+        "status": "proposed",
+        "system": true
+      }
+    ]
+  }
+}
